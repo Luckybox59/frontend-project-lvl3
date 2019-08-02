@@ -4,17 +4,28 @@
     <title>RSS Reader</title>
   </head>
   <body>
-    <div class="mt-3 container-fluid">
-      <div class="row justify-content-center">
-        <div class="col-6 jumbotron">
+    <div class="mt-3 container">
+      <div class="row">
+        <div class="col-8 jumbotron">
           <h1 class="display-4">RSS Reader</h1>
           <hr class="my-4">
           <form>
             <div class="form-group">
               <input class="form-control" placeholder="URL">
             </div>
-            <button type="submit" class="btn btn-primary">Read</button>
+            <button type="submit" class="btn btn-primary" disabled>Read</button>
           </form>
+        </div>
+        <div class="col-4 overflow-auto" style="height: 200px;">
+          <ul class="list-group">
+            <li class="list-group-item active">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Morbi leo risus</li>
+            <li class="list-group-item">Porta ac consectetur ac</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+          </ul>
         </div>
       </div>
     </div>
