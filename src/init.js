@@ -1,8 +1,8 @@
 import { watch } from 'melanke-watchjs';
 import { isURL } from 'validator';
 import axios from 'axios';
-import '@babel/polyfill';
-import { parse } from './Helpers';
+// import '@babel/polyfill';
+import { parseFeed } from './Helpers';
 
 export default () => {
   const state = {
@@ -13,7 +13,8 @@ export default () => {
   };
 
   const button = document.querySelector('button');
-  const ul = document.querySelector('ul');
+  const listOfFeeds = document.querySelector('#listOfFeeds');
+  const listOfPosts = document.querySelector('#listOfPosts');
   const input = document.querySelector('input');
   const form = document.querySelector('form');
 
@@ -26,23 +27,42 @@ export default () => {
   });
 
   watch(state, 'feeds', () => {
+    listOfFeeds.innerHTML = '';
     state.feeds.forEach((f) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item');
-      li.textContent = `${f.title}`;
-      ul.appendChild(li);
+      li.innerHTML = `<h4>${f.title}</h4><p>${f.description}</p>`;
+      listOfFeeds.append(li);
+    });
+  });
+
+  watch(state, 'posts', () => {
+    listOfPosts.innerHTML = '';
+    state.posts.forEach((p) => {
+      const a = document.createElement('a');
+      a.setAttribute('href', p.link);
+      a.textContent = `${p.title}`;
+      const li = document.createElement('li');
+      li.classList.add('list-group-item', 'mt-3');
+      li.appendChild(a);
+      listOfPosts.appendChild(li);
     });
   });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const feed = parse(xmlStr);
-    state.feeds = [...state.feeds, { url: 'xe', title: feed.title, description: feed.description }];
+    const currentValue = input.value;
+
+    axios.get(`https://cors-anywhere.herokuapp.com/${currentValue}`)
+      .then(resp => parseFeed(resp.data))
+      .then((feed) => {
+        state.feeds = [{ ...feed, url: currentValue }, ...state.feeds];
+        state.posts = [...feed.posts, ...state.posts];
+      });
   });
 
   input.addEventListener('keyup', ({ target: { value } }) => {
-    if (isURL(value)) {
-      state.url = value;
+    if (isURL(value) && state.feeds.every(f => f.url !== value)) {
       state.validationSuccess = true;
     } else {
       state.validationSuccess = false;

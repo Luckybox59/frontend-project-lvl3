@@ -1,20 +1,17 @@
-import axios from 'axios';
+const parseItem = item => [...item.children]
+  .reduce((acc, c) => ({ ...acc, [c.tagName]: c.textContent.trim() }), {});
 
-export const parse = (xml) => {
+const parseFeed = (xml) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xml, 'text/xml');
+  console.log(xml);
   const channelTitle = doc.querySelector('channel>title')
   const channelDescription = doc.querySelector('channel>description');
   const items = doc.querySelectorAll('item');
-
-  console.log(items);
-  return { title: channelTitle.textContent, description: channelDescription.textContent };
-  // return obj;
+  const posts = [...items]
+    .filter((item, index) => index < 10)
+    .map(item => parseItem(item));
+  return { title: channelTitle.textContent, description: channelDescription.textContent, posts };
 };
 
-const parseXML = (url) => {
-  const parser = new DOMParser();
-  axios.get(url)
-    .then(resp => parser.parseFromString(resp.data, 'text/xml'))
-    .then(doc => console.log(doc));
-};
+export { parseFeed };
