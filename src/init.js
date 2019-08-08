@@ -6,7 +6,8 @@ import parseFeed from './Helpers';
 export default () => {
   const state = {
     validationSuccess: false,
-    showAlert: false,
+    showModal: false,
+    modal: {},
     feeds: [],
     posts: [],
   };
@@ -18,14 +19,24 @@ export default () => {
   const input = document.querySelector('input');
   const form = document.querySelector('form');
 
-  watch(state, 'showAlert', () => {
-    const alert = document.querySelector('[role=alert]');
+  watch(state, 'showModal', () => {
+    const descriptionModal = document.querySelector(state.modal.id);
 
-    if (state.showAlert && state.validationSuccess) {
-      alert.classList.add('show');
-    } else {
-      alert.classList.remove('show');
+    if (!state.showModal) {
+      descriptionModal.classList.remove('show');
+      descriptionModal.style.display = 'none';
+      return;
     }
+    descriptionModal.querySelector('.modal-title').textContent = state.modal.actualContent.title;
+    descriptionModal.querySelector('.modal-body').textContent = state.modal.actualContent.description;
+    descriptionModal.classList.add('show');
+    descriptionModal.style.display = 'block';
+    const dismissElems = descriptionModal.querySelectorAll('[data-dismiss="modal"]');
+    dismissElems.forEach((el) => {
+      el.addEventListener('click', () => {
+        state.showModal = false;
+      });
+    });
   });
 
   watch(state, 'validationSuccess', () => {
@@ -55,9 +66,18 @@ export default () => {
       a.textContent = `${p.title}`;
       const descriptionButton = document.createElement('button');
       descriptionButton.classList.add('btn', 'btn-primary');
-      descriptionButton.setAttribute('type', 'button');
-      descriptionButton.setAttribute('data-toggle', 'modal');
+      descriptionButton.type = 'button';
+      descriptionButton.dataset.toggle = 'modal';
+      descriptionButton.dataset.id = p.link;
+      descriptionButton.dataset.toggle = 'modal';
+      descriptionButton.dataset.target = '#descriptionModal';
       descriptionButton.textContent = 'Описание';
+      descriptionButton.addEventListener('click', ({ target: { dataset } }) => {
+        const { target } = dataset;
+        state.modal.id = target;
+        state.modal.actualContent = p;
+        state.showModal = true;
+      });
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'mt-3', 'd-flex', 'justify-content-between');
       li.append(a);
@@ -84,6 +104,7 @@ export default () => {
   });
 
   input.addEventListener('keyup', ({ target: { value } }) => {
+    console.log(state.posts[0]);
     if (isURL(value) && state.feeds.every(f => f.url !== value)) {
       state.validationSuccess = true;
     } else {
